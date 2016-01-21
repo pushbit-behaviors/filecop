@@ -1,11 +1,13 @@
 $stdout.sync = true
 require "json"
 require "faraday"
+require "filecop"
 
-data = JSON.parse(ARGF.read)
+changed_files = (ENV.fetch("CHANGED_FILES") || ARGF.read).split(' ')
+data = Filecop::Runner(changed_files)
 
 if data.length < 1
-  puts "No problems found"
+  puts "No sensitive files found"
 else
   puts "#{data.length} problems found"
   
