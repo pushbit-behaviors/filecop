@@ -2,6 +2,7 @@ kind: filecop
 name: Filecop
 description: "Detects potentially hazardeous commited files and strings such as private keys, passwords, access tokens and certs"
 discovers: sensitive file
+checkout: none
 author: 
   name: Tom Moor
   email: tom.moor@gmail.com
