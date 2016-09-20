@@ -4,17 +4,18 @@ require "faraday"
 require "filecop"
 
 changed_files = (ENV.fetch("CHANGED_FILES") || ARGF.read).split(' ')
-data = Filecop::Runner(changed_files)
+runner = Filecop::Runner.new(changed_files)
+data = runner.run
 
 if data.length < 1
   puts "No sensitive files found"
 else
   puts "#{data.length} problems found"
-  
+
   conn = Faraday.new(:url => ENV.fetch("APP_URL")) do |config|
     config.adapter Faraday.default_adapter
   end
-  
+
   data.each do |warning|
     discovery = {
       title: warning["message"],
@@ -25,7 +26,7 @@ else
       identifier: warning["file"],
       priority: :medium
     }
-    
+
     res = conn.post do |req|
       req.url '/discoveries'
       req.headers['Content-Type'] = 'application/json'
