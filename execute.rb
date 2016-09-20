@@ -17,24 +17,22 @@ else
   end
 
   data.each do |warning|
-    body = "It looks like you may have accidentally commited this file, if so, this article may be of assistance: https://help.github.com/articles/remove-sensitive-data/"
+    body = "#{warning[:rule].message}\n\nIt looks like you may have accidentally commited this file, if so, this article may be of assistance: https://help.github.com/articles/remove-sensitive-data/"
 
-    discovery = {
-      title: warning["message"],
-      path: warning["file"],
+    payload = {
+      path: warning[:file],
       line: 1,
       body: body,
       task_id: ENV.fetch("TASK_ID"),
       kind: "line_comment",
-      identifier: warning["file"],
-      priority: :medium
+      identifier: warning[:file],
     }
 
     res = conn.post do |req|
-      req.url '/actions?kind=line_comments'
+      req.url '/actions'
       req.headers['Content-Type'] = 'application/json'
       req.headers['Authorization'] = "Basic #{ENV.fetch("ACCESS_TOKEN")}"
-      req.body = discovery.to_json
+      req.body = payload.to_json
     end
     puts res.inspect
   end
