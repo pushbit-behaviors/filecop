@@ -3,7 +3,7 @@ require "json"
 require "faraday"
 require "filecop"
 
-changed_files = (ENV.fetch("CHANGED_FILES") || ARGF.read).split(' ')
+changed_files = (ENV.fetch("PUSHBIT_CHANGED_FILES") || ARGF.read).split(' ')
 runner = Filecop::Runner.new(changed_files)
 data = runner.run
 
@@ -12,7 +12,7 @@ if data.length < 1
 else
   puts "#{data.length} problems found"
 
-  conn = Faraday.new(:url => ENV.fetch("APP_URL")) do |config|
+  conn = Faraday.new(:url => ENV.fetch("PUSHBIT_API_URL")) do |config|
     config.adapter Faraday.default_adapter
   end
 
@@ -23,7 +23,7 @@ else
       path: warning[:file],
       line: 1,
       body: body,
-      task_id: ENV.fetch("TASK_ID"),
+      task_id: ENV.fetch("PUSHBIT_TASK_ID"),
       kind: "line_comment",
       identifier: warning[:file],
     }
@@ -31,7 +31,7 @@ else
     res = conn.post do |req|
       req.url '/actions'
       req.headers['Content-Type'] = 'application/json'
-      req.headers['Authorization'] = "Basic #{ENV.fetch("ACCESS_TOKEN")}"
+      req.headers['Authorization'] = "Basic #{ENV.fetch("PUSHBIT_API_TOKEN")}"
       req.body = payload.to_json
     end
     puts res.inspect
